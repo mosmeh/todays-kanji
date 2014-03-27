@@ -9,11 +9,15 @@ class Fetcher
   def call
     rss = RSS::Parser.parse(RSS_URI)
     items = rss.items
+
     if File.exists?(STORED_FILE)
       stored = Marshal.load(File.read(STORED_FILE))
       latest = stored.max_by{|item| item.date}.date
       items = stored | items.select{|item| item.date > latest}
     end
-    File.write(STORED_FILE, Marshal.dump(items))
+
+    File.open(STORED_FILE, 'wb') do |f|
+      f.write(Marshal.dump(items))
+    end
   end
 end
